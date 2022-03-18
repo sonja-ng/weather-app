@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 import DayForecast from './dayforecast';
-const api = {
-  key: "17d39ff02ef7396e173f232eed2daeef",
-  base: "http://api.openweathermap.org/data/2.5/"
-}
 
 function App() {
   const [query, setQuery] = useState("");
