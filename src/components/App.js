@@ -1,23 +1,55 @@
-import React, { useState } from 'react';
-import DayForecast from './dayforecast';
+import React, { Fragment, useState, useEffect } from 'react';
+import axios from 'axios';
 
 function App() {
-  const [query, setQuery] = useState("");
-  const [weather, setWeather] = useState({});
+  const [data, setData] = useState({ hits: [] });
+  const [query, setQuery] = useState('redux');
+  const [url, setUrl] = useState(
+    'https://hn.algolia.com/api/v1/search?query=redux');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const search = evt => {
-    if (evt.key === 'Enter'){
-      fetch(`${api.base}weather?q=${query}&units=metric&APPID=${api.key}`)
-        .then(res => res.json())
-        .then(result => setWeather(result));
-    }
-  }
+  useEffect(()=>{
+    async function fetchData(){
+      setIsLoading(true);
+      setIsError(false);
+      try{
+        const result = await axios(url);
+        setData(result.data);
+      } catch(error){
+        setIsError(true);
+      }
+    setIsLoading(false);
+  };
+    fetchData()
+  }, [url]);
+    
   return (
-    <div className="weather-app">
+    <Fragment>
+      <form onSubmit={(e)=> {
+        e.preventDefault();
+        setUrl(`https://hn.algolia.com/api/v1/search?query=${query}`)
+        }}>
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+        />
+        <button type="submit">
+            Submit
+        </button>
+      </form>
+      {isError && <div>Something went wrong...</div>}
+      {isLoading ? (<div>Loading...</div>) : (
       <ul>
-        <DayForecast />
+        {data.hits.map(item=>(
+          <li key={item.objectID}>
+            <a href={item.url}>{item.title}</a>
+          </li>
+        ))}
       </ul>
-    </div>
+      )}
+    </Fragment>
   );
 }
 
